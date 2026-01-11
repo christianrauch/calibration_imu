@@ -17,6 +17,7 @@ find_package(rosbag2_cpp REQUIRED)
 find_package(rosbag2_storage REQUIRED) # For storage options if needed
 find_package(ifopt REQUIRED)
 find_package(Boost REQUIRED COMPONENTS thread)
+find_package(Eigen3 REQUIRED NO_MODULE)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -53,6 +54,7 @@ target_link_libraries(magnetometer
   Qt5::Widgets
   Qt5::DataVisualization
   Boost::thread
+  Eigen3::Eigen
 )
 
 ament_target_dependencies(magnetometer
@@ -85,6 +87,7 @@ target_link_libraries(accelerometer
   Qt5::Widgets
   Qt5::Charts
   Boost::thread
+  Eigen3::Eigen
 )
 
 ament_target_dependencies(accelerometer
