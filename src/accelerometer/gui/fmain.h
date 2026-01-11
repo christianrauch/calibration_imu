@@ -13,7 +13,7 @@ class fmain;
 
 #include <QTimer>
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
 class fmain : public QMainWindow
 {
@@ -58,7 +58,7 @@ private:
 
     // ROS
     /// \brief Stores the node's handle.
-    std::shared_ptr<ros::NodeHandle> m_node;
+    std::shared_ptr<rclcpp::Node> m_node;
     /// \brief A timer for spinning ROS.
     QTimer m_ros_spinner;
     /// \brief The worker method for spinning ROS.

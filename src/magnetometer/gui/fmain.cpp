@@ -15,10 +15,10 @@ fmain::fmain(QWidget *parent)
     ui->progressbar_calibrate->setVisible(false);
 
     // Set up node handle.
-    fmain::m_node = new ros::NodeHandle();
+    fmain::m_node = std::make_shared<rclcpp::Node>("calibration_magnetometer");
 
     // Create data interface instance.
-    fmain::m_data_interface = std::make_shared<magnetometer::data_interface>();
+    fmain::m_data_interface = std::make_shared<magnetometer::data_interface>(fmain::m_node);
 
     // Initialize calibrator.
     fmain::m_calibrator = std::make_shared<magnetometer::calibrator>(fmain::m_data_interface);
@@ -40,7 +40,7 @@ fmain::fmain(QWidget *parent)
 fmain::~fmain()
 {
     // Clean up node.
-    delete fmain::m_node;
+    // m_node is shared_ptr, auto cleaned.
 
     // Clean up UI.
     delete ui;
@@ -50,10 +50,10 @@ fmain::~fmain()
 void fmain::ros_spin()
 {
     // Handle callbacks.
-    ros::spinOnce();
+    rclcpp::spin_some(fmain::m_node);
 
     // Quit if ROS shutting down.
-    if(!ros::ok())
+    if(!rclcpp::ok())
     {
         QApplication::quit();
     }

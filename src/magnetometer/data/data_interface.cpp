@@ -1,19 +1,21 @@
 #include "magnetometer/data/data_interface.h"
 
-#include <rosbag/bag.h>
-#include <rosbag/view.h>
+
+
+#include <rclcpp/serialization.hpp>
 
 using namespace magnetometer;
 
 // CONSTRUCTORS
-data_interface::data_interface()
+data_interface::data_interface(std::shared_ptr<rclcpp::Node> node)
 {
+    m_node = node;
     // Initialize flags.
     data_interface::f_subscriber_enabled = false;
 
     // Load parameters.
-    ros::NodeHandle private_handle("~");
-    data_interface::p_max_data_rate = private_handle.param<double>("max_data_rate", 1000.0);
+    m_node->declare_parameter("max_data_rate", 1000.0);
+    data_interface::p_max_data_rate = m_node->get_parameter("max_data_rate").as_double();
 }
 data_interface::~data_interface()
 {
@@ -26,8 +28,8 @@ void data_interface::start_subscriber()
 {
     if(!data_interface::f_subscriber_enabled)
     {
-        ros::NodeHandle node_handle;
-        data_interface::m_subscriber = node_handle.subscribe("/imu/magnetometer", 100, &data_interface::subscriber, this);
+        data_interface::m_subscriber = m_node->create_subscription<sensor_msgs::msg::MagneticField>(
+            "~/magnetometer", 100, std::bind(&data_interface::subscriber, this, std::placeholders::_1));
         data_interface::m_data_timer.start();
         data_interface::f_subscriber_enabled = true;
     }
@@ -36,7 +38,7 @@ void data_interface::stop_subscriber()
 {
     if(data_interface::f_subscriber_enabled)
     {
-        data_interface::m_subscriber.shutdown();
+        data_interface::m_subscriber.reset();
         data_interface::m_data_timer.invalidate();
         data_interface::f_subscriber_enabled = false;
     }
@@ -45,36 +47,31 @@ void data_interface::stop_subscriber()
 // DATA FILE IO
 bool data_interface::save_data(std::string& bag_file) const
 {
-    // Get remapped topic to write to.
-    std::string topic = ros::names::resolve("/imu/magnetometer");
-
     // Write file.
     try
     {
         // Open the bag file for writing.
-        rosbag::Bag bag(bag_file, rosbag::bagmode::Write);
+        rosbag2_cpp::Writer writer;
+        writer.open(bag_file);
 
         // Iterate over points.
-        sensor_msgs_ext::magnetometer message;
+        sensor_msgs::msg::MagneticField message;
         for(uint32_t i = 0; i < data_interface::m_x.size(); ++i)
         {
             // Populate message.
-            message.x = data_interface::m_x.at(i);
-            message.y = data_interface::m_y.at(i);
-            message.z = data_interface::m_z.at(i);
+            message.magnetic_field.x = data_interface::m_x.at(i);
+            message.magnetic_field.y = data_interface::m_y.at(i);
+            message.magnetic_field.z = data_interface::m_z.at(i);
 
             // Write message to bag.
-            bag.write(topic, ros::Time::now(), message);
+            writer.write(message, "/imu/magnetometer", m_node->now());
         }
-
-        // Close bag.
-        bag.close();
 
         return true;
     }
     catch(std::exception& e)
     {
-        ROS_ERROR_STREAM("error writing data to bag file (" << e.what() << ")");
+        RCLCPP_ERROR_STREAM(m_node->get_logger(), "error writing data to bag file (" << e.what() << ")");
         return false;
     }
 }
@@ -83,30 +80,31 @@ bool data_interface::load_data(std::string& bag_file)
     // Clear existing data.
     data_interface::clear_data();
 
-    // Get remapped topic to read from.
-    std::string topic = ros::names::resolve("/imu/magnetometer");
-
     // Read file.
     try
     {
         // Open the bag file for reading.
-        rosbag::Bag bag(bag_file, rosbag::bagmode::Read);
+        rosbag2_cpp::Reader reader;
+        reader.open(bag_file);
 
-        // Get view to magnetometer topic.
-        rosbag::View view(bag, rosbag::TopicQuery(topic));
+        // Serialization helper
+        rclcpp::Serialization<sensor_msgs::msg::MagneticField> serialization;
 
         // Iterate through view.
-        for(auto instance = view.begin(); instance != view.end(); ++instance)
+        while(reader.has_next())
         {
-            // Instantiate message.
-            auto message = instance->instantiate<sensor_msgs_ext::magnetometer>();
+            auto bag_message = reader.read_next();
 
-            // Read message.
-            if(message)
+            // Check topic
+            if(bag_message->topic_name == "/imu/magnetometer")
             {
-                data_interface::m_x.push_back(message->x);
-                data_interface::m_y.push_back(message->y);
-                data_interface::m_z.push_back(message->z);
+                 sensor_msgs::msg::MagneticField message;
+                 rclcpp::SerializedMessage extracted_serialized_msg(*bag_message->serialized_data);
+                 serialization.deserialize_message(&extracted_serialized_msg, &message);
+
+                 data_interface::m_x.push_back(message.magnetic_field.x);
+                 data_interface::m_y.push_back(message.magnetic_field.y);
+                 data_interface::m_z.push_back(message.magnetic_field.z);
             }
         }
 
@@ -117,7 +115,7 @@ bool data_interface::load_data(std::string& bag_file)
     }
     catch(std::exception& e)
     {
-        ROS_ERROR_STREAM("error reading from bag file (" << e.what() << ")");
+        RCLCPP_ERROR_STREAM(m_node->get_logger(), "error reading from bag file (" << e.what() << ")");
         return false;
     }
 }
@@ -171,7 +169,7 @@ bool data_interface::get_point(uint32_t index, QVector3D& point)
 }
 
 // DATA SUBSCRIBER
-void data_interface::subscriber(const sensor_msgs_ext::magnetometerConstPtr& message)
+void data_interface::subscriber(const sensor_msgs::msg::MagneticField::SharedPtr message)
 {
     // Enforce max data rate.
     if(data_interface::m_data_timer.elapsed() >= 1000.0/data_interface::p_max_data_rate)
@@ -180,9 +178,9 @@ void data_interface::subscriber(const sensor_msgs_ext::magnetometerConstPtr& mes
         data_interface::m_data_timer.restart();
 
         // Capture point.
-        data_interface::m_x.push_back(message->x);
-        data_interface::m_y.push_back(message->y);
-        data_interface::m_z.push_back(message->z);
+        data_interface::m_x.push_back(message->magnetic_field.x);
+        data_interface::m_y.push_back(message->magnetic_field.y);
+        data_interface::m_z.push_back(message->magnetic_field.z);
 
         // Raise signal.
         emit data_interface::data_updated();

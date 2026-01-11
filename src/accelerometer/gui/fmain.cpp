@@ -16,7 +16,7 @@ fmain::fmain(QWidget *parent) :
     fmain::ui->progress_bar_calibration->setVisible(false);
 
     // Set up node handle.
-    fmain::m_node = std::make_shared<ros::NodeHandle>();
+    fmain::m_node = std::make_shared<rclcpp::Node>("calibration_accelerometer");
 
     // Set up the components.
     fmain::m_data_interface = std::make_shared<accelerometer::data_interface>(fmain::m_node);
@@ -51,10 +51,10 @@ fmain::~fmain()
 void fmain::ros_spin()
 {
     // Handle callbacks.
-    ros::spinOnce();
+    rclcpp::spin_some(fmain::m_node);
 
     // Quit if ROS shutting down.
-    if(!ros::ok())
+    if(!rclcpp::ok())
     {
         QApplication::quit();
     }

@@ -3,14 +3,15 @@
 using namespace accelerometer;
 
 // CONSTRUCTORS
-data_interface::data_interface(std::shared_ptr<ros::NodeHandle> node)
+data_interface::data_interface(std::shared_ptr<rclcpp::Node> node)
 {
     // Store nodehandle.
     data_interface::m_node = node;
 
     // Read parameters.
-    ros::NodeHandle private_node("~");
-    data_interface::p_buffer_size = private_node.param<int32_t>("sample_size", 100);
+    m_node->declare_parameter("sample_size", 100);
+    // Cast to int (as parameters can be int64)
+    data_interface::p_buffer_size = static_cast<uint32_t>(m_node->get_parameter("sample_size").as_int());
 
     // Initialize matrix instances.
     data_interface::m_buffer_average.setZero();
@@ -36,11 +37,9 @@ void data_interface::start_collection()
         // Clear the buffer.
         data_interface::m_buffer.clear();
 
-        // Get remapped topic name.
-        std::string topic_name = ros::names::resolve("imu/accelerometer");
-
         // Start subscriber.
-        data_interface::m_subscriber = data_interface::m_node->subscribe(topic_name, 100, &data_interface::subscriber, this);
+        data_interface::m_subscriber = data_interface::m_node->create_subscription<sensor_msgs::msg::Imu>(
+            "~/imu", 100, std::bind(&data_interface::subscriber, this, std::placeholders::_1));
     }
 }
 void data_interface::stop_collection()
@@ -48,7 +47,7 @@ void data_interface::stop_collection()
     if(data_interface::f_is_collecting)
     {
         data_interface::f_is_collecting = false;
-        data_interface::m_subscriber.shutdown();
+        data_interface::m_subscriber.reset();
     }
 }
 bool data_interface::grab(orientation_t orientation)
@@ -96,7 +95,7 @@ void data_interface::clear_dataset()
 }
 
 // SUBSCRIBER
-void data_interface::subscriber(const sensor_msgs_ext::accelerometerConstPtr& message)
+void data_interface::subscriber(const sensor_msgs::msg::Imu::SharedPtr message)
 {
     // Check if collecting; subscriber may have been shut down but still going through queue.
     if(data_interface::f_is_collecting)
@@ -106,7 +105,7 @@ void data_interface::subscriber(const sensor_msgs_ext::accelerometerConstPtr& me
         {
             data_interface::m_buffer.pop_front();
         }
-        data_interface::m_buffer.push_back({message->x, message->y, message->z});
+        data_interface::m_buffer.push_back({message->linear_acceleration.x, message->linear_acceleration.y, message->linear_acceleration.z});
 
         // Check if buffer full.
         if(data_interface::m_buffer.size() == data_interface::p_buffer_size)

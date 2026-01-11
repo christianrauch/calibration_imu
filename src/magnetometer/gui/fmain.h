@@ -15,7 +15,7 @@ QT_END_NAMESPACE
 
 #include <QTimer>
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 
 /// \brief The primary GUI for magnetometer calibration.
 class fmain : public QMainWindow
@@ -52,7 +52,7 @@ private:
 
     // ROS
     /// \brief Stores the node's handle.
-    ros::NodeHandle* m_node;
+    std::shared_ptr<rclcpp::Node> m_node;
     /// \brief A timer for spinning ROS.
     QTimer m_ros_spinner;
     /// \brief The worker method for spinning ROS.

@@ -9,8 +9,10 @@
 
 #include <eigen3/Eigen/Dense>
 
-#include <ros/ros.h>
-#include <sensor_msgs_ext/magnetometer.h>
+#include <rclcpp/rclcpp.hpp>
+#include <sensor_msgs/msg/magnetic_field.hpp>
+#include <rosbag2_cpp/writer.hpp>
+#include <rosbag2_cpp/reader.hpp>
 
 /// \brief Includes all software components related to magnetometer interfacing.
 namespace magnetometer
@@ -24,7 +26,7 @@ class data_interface
 public:
     // CONSTRUCTOR
     /// \brief Creates a new data interface instance.
-    data_interface();
+    data_interface(std::shared_ptr<rclcpp::Node> node);
     ~data_interface();
 
     // DATA SUBSCRIBER
@@ -66,9 +68,9 @@ signals:
 private:
     // DATA SUBSCRIBER
     /// \brief A subscriber for magnetometer data.
-    ros::Subscriber m_subscriber;
+    rclcpp::Subscription<sensor_msgs::msg::MagneticField>::SharedPtr m_subscriber;
     /// \brief The subscriber method for receiving magnetometer data.
-    void subscriber(const sensor_msgs_ext::magnetometerConstPtr& message);
+    void subscriber(const sensor_msgs::msg::MagneticField::SharedPtr message);
     /// \brief A flag indicating if the data subscriber is enabled.
     bool f_subscriber_enabled;
 
@@ -85,6 +87,9 @@ private:
     std::vector<double> m_y;
     /// \brief Magnetometer z-axis data.
     std::vector<double> m_z;
+
+    /// \brief The node handle.
+    std::shared_ptr<rclcpp::Node> m_node;
 };
 
 }

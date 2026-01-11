@@ -5,8 +5,8 @@
 
 #include <QObject>
 
-#include <ros/ros.h>
-#include <sensor_msgs_ext/accelerometer.h>
+#include <rclcpp/rclcpp.hpp>
+#include <sensor_msgs/msg/imu.hpp>
 
 #include <eigen3/Eigen/Dense>
 
@@ -22,7 +22,7 @@ public:
     // CONSTRUCTORS
     /// \brief Creates a new data_interface instance.
     /// \param node The shared ROS node handle.
-    data_interface(std::shared_ptr<ros::NodeHandle> node);
+    data_interface(std::shared_ptr<rclcpp::Node> node);
     ~data_interface();
 
     // ENUMERATIONS
@@ -66,14 +66,14 @@ signals:
 private:
     // ROS
     /// \brief The application's node handle.
-    std::shared_ptr<ros::NodeHandle> m_node;
+    std::shared_ptr<rclcpp::Node> m_node;
 
     // SUBSCRIBERS
     /// \brief The accelerometer data subscriber.
-    ros::Subscriber m_subscriber;
+    rclcpp::Subscription<sensor_msgs::msg::Imu>::SharedPtr m_subscriber;
     /// \brief The accelerometer subscriber callback.
     /// \param message The received acceleration message.
-    void subscriber(const sensor_msgs_ext::accelerometerConstPtr& message);
+    void subscriber(const sensor_msgs::msg::Imu::SharedPtr message);
 
     // FLAGS
     /// \brief Indicates if the data_interface is currently collecting data.

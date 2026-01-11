@@ -1,6 +1,6 @@
 #include "magnetometer/calibration/calibrator.h"
 
-#include <ros/node_handle.h>
+#include <rclcpp/rclcpp.hpp>
 
 #include "common/calibration/variables_center.h"
 #include "common/calibration/variables_radius.h"
@@ -118,7 +118,7 @@ bool calibrator::save_calibration_json(std::string filepath)
     }
     catch(const std::exception& e)
     {
-        ROS_ERROR_STREAM("error writing JSON calibration file (" << e.what() << ")");
+        RCLCPP_ERROR_STREAM(rclcpp::get_logger("calibrator"), "error writing JSON calibration file (" << e.what() << ")");
         return false;
     }
 
@@ -131,7 +131,7 @@ bool calibrator::save_calibration_yaml(std::string filepath)
 
     if(!yaml_file)
     {
-        ROS_ERROR_STREAM("error writing YAML calibration file (" << std::strerror(errno) << ")");
+        RCLCPP_ERROR_STREAM(rclcpp::get_logger("calibrator"), "error writing YAML calibration file (" << std::strerror(errno) << ")");
         return false;
     }
 

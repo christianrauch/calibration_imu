@@ -2,13 +2,18 @@
 
 #include <QApplication>
 
+#include <rclcpp/rclcpp.hpp>
+
 int main(int argc, char *argv[])
 {
-    // Initialize ROS
-    ros::init(argc, argv, "calibration_magnetometer");
+    // Initialize ROS 2
+    rclcpp::init(argc, argv);
 
     QApplication a(argc, argv);
     fmain w;
     w.show();
-    return a.exec();
+    int result = a.exec();
+
+    rclcpp::shutdown();
+    return result;
 }
