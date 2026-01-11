@@ -51,18 +51,15 @@ target_include_directories(magnetometer PUBLIC
   $<INSTALL_INTERFACE:include>)
 
 target_link_libraries(magnetometer
+  rclcpp::rclcpp
+  ${sensor_msgs_TARGETS}
+  rosbag2_cpp::rosbag2_cpp
+  rosbag2_storage::rosbag2_storage
+  ifopt::ifopt_ipopt
   Qt5::Widgets
   Qt5::DataVisualization
   Boost::thread
   Eigen3::Eigen
-)
-
-ament_target_dependencies(magnetometer
-  rclcpp
-  sensor_msgs
-  rosbag2_cpp
-  rosbag2_storage
-  ifopt
 )
 
 # Accelerometer Executable
@@ -84,18 +81,15 @@ target_include_directories(accelerometer PUBLIC
   $<INSTALL_INTERFACE:include>)
 
 target_link_libraries(accelerometer
+  rclcpp::rclcpp
+  ${sensor_msgs_TARGETS}
+  rosbag2_cpp::rosbag2_cpp
+  rosbag2_storage::rosbag2_storage
+  ifopt::ifopt_ipopt
   Qt5::Widgets
   Qt5::Charts
   Boost::thread
   Eigen3::Eigen
-)
-
-ament_target_dependencies(accelerometer
-  rclcpp
-  sensor_msgs
-  rosbag2_cpp
-  rosbag2_storage
-  ifopt
 )
 
 # Install
