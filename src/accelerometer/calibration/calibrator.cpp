@@ -38,7 +38,7 @@ bool calibrator::start(const Eigen::Matrix<double, 3, 6>& data_set, double true_
         calibrator::m_calibration.setIdentity();
 
         // Start optimization thread to generate fit.
-        calibrator::m_thread = boost::thread(boost::bind(&calibrator::thread_worker, this, data_set, true_gravity_vector));
+        calibrator::m_thread = std::thread(std::bind(&calibrator::thread_worker, this, data_set, true_gravity_vector));
         return true;
     }
     else

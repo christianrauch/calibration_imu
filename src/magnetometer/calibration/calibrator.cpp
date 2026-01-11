@@ -58,7 +58,7 @@ bool calibrator::start(double true_field_strength)
         calibrator::m_calibration.setIdentity();
 
         // Start optimization thread to generate fit.
-        calibrator::m_thread = boost::thread(&calibrator::thread_worker, this);
+        calibrator::m_thread = std::thread(&calibrator::thread_worker, this);
         return true;
     }
     else

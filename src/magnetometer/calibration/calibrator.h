@@ -8,7 +8,7 @@
 #include <ifopt/problem.h>
 #include <ifopt/ipopt_solver.h>
 
-#include <boost/thread.hpp>
+#include <thread>
 
 #include "magnetometer/data/data_interface.h"
 
@@ -76,7 +76,7 @@ private:
 
     // THREADING
     /// \brief The thread instance for running the calibration routine on.
-    boost::thread m_thread;
+    std::thread m_thread;
     /// \brief The calibration thread's worker function.
     void thread_worker();
     /// \brief Thread-safe indicator for if the thread is currently running.

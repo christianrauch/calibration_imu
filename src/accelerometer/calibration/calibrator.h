@@ -10,7 +10,7 @@
 
 #include <Eigen/Dense>
 
-#include <boost/thread.hpp>
+#include <thread>
 
 namespace accelerometer
 {
@@ -63,7 +63,7 @@ signals:
 private:
     // THREADING
     /// \brief The thread instance for running the calibration routine on.
-    boost::thread m_thread;
+    std::thread m_thread;
     /// \brief The calibration thread's worker function.
     void thread_worker(Eigen::Matrix<double, 3, 6> data_set, double true_gravity_vector);
     /// \brief Thread-safe indicator for if the thread is currently running.
