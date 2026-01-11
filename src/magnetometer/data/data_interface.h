@@ -7,7 +7,7 @@
 #include <QVector3D>
 #include <QElapsedTimer>
 
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Dense>
 
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/magnetic_field.hpp>

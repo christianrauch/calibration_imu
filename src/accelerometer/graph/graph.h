@@ -10,7 +10,7 @@
 #include <QtCharts/QBoxPlotSeries>
 #include <QtCharts/QLineSeries>
 
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Dense>
 
 namespace accelerometer {
 

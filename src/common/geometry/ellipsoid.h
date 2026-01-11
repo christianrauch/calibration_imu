@@ -3,7 +3,7 @@
 #ifndef ELLIPSOID_H
 #define ELLIPSOID_H
 
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Dense>
 
 #include <vector>
 

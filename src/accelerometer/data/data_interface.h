@@ -8,7 +8,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/imu.hpp>
 
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Dense>
 
 #include <deque>
 

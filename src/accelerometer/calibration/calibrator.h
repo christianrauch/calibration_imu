@@ -8,7 +8,7 @@
 #include <ifopt/problem.h>
 #include <ifopt/ipopt_solver.h>
 
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Dense>
 
 #include <boost/thread.hpp>
 
