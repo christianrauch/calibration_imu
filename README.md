@@ -116,6 +116,6 @@ The calibration routine needs a set of uncalibrated data points to process so it
 
 The calibration routine can now be executed on the collected data. To calibrate:
 
-1. Enter the true gravity acceleration constant in the supplied text box. You may look up the true field strength using NOAA's [World Magnetic Model](https://geodesy.noaa.gov/cgi-bin/grav_pdx.prl) and your current location on earth.
+1. Enter the true gravity acceleration constant in the supplied text box. You may look up the true field strength using NOAA's [Surface Gravity Prediction](https://geodesy.noaa.gov/cgi-bin/grav_pdx.prl) and your current location on earth.
 2. Start the calibration. It should take anywhere from 1s-5s depending on your computer performance. Once the calibration is complete, it will appear in the calibration textbox. The graph will now show the "Fit" and "Calibration" data. The fit is the calculated range of uncalibrated accelerometer data based on the collected data. The fit plot shows the offset and scale errors of the uncalibrated accelerometer. The calibration plot shows the offset and range of the accelerometer after the calibration is applied. This can be used to verify the accuracy of the calibration.
 3. You may export your calibration by either copying the calibration text box, saving it to JSON format, or saving it to YAML format.
